@@ -1,5 +1,4 @@
 import os
-from os.path import isdir, join
 import sys
 import shutil
 import importlib
@@ -28,11 +27,13 @@ def nan_outliers(df, col, stds=2.5):
 
 #put the style sheet where it needs to be
 stl = 'rems_dark.mplstyle'
-trdir = join(matplotlib.get_configdir(), 'stylelib')
-if not isdir(trdir):
+trdir = os.path.join(matplotlib.get_configdir(), 'stylelib')
+if not os.path.isdir(trdir):
     os.mkdir(trdir)
-trfn = join(trdir, stl)
-shutil.copyfile(stl, trfn)
+trfn = os.path.join(trdir, 'stl')
+if os.path.isfile(trfn):
+    os.remove(trfn)
+shutil.copy(stl, trdir)
 
 #use the style sheet
 importlib.reload(matplotlib)
@@ -70,7 +71,7 @@ while(sol < df.SOL.max()):
     sol += 669
 ax1.set_ylabel('Daily Surface\nAir Temperature (K)')
 ax1.legend()
-ax1.grid(True)
+ax1.grid(True, alpha=0.1)
 
 #plot surface pressure
 ax2.plot(df.SOL, df.PRESSURE_max, '.', color='C2', markersize=1.5, label='Max Pressure')
@@ -83,7 +84,7 @@ while(sol < df.SOL.max()):
 ax2.set_ylabel('Daily Surface\nPressure (Pa)')
 ax2.set_xlabel('Sol (Mars Day)')
 ax2.legend()
-ax2.grid(True)
+ax2.grid(True, alpha=0.1)
 
 #save
 fig.suptitle('Curiosity Rover Temperature and Pressure\n(Outliers Removed)')
