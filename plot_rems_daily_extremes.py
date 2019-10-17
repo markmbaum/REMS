@@ -1,11 +1,8 @@
-import os
-from os.path import isdir, join
-import sys
-import shutil
-import importlib
 import numpy as np
 import pandas as pd
-import matplotlib
+import matplotlib.pyplot as plt
+
+plt.style.use('dark_background')
 
 #-------------------------------------------------------------------------------
 #INPUT
@@ -25,21 +22,6 @@ def nan_outliers(df, col, stds=2.5):
 
 #-------------------------------------------------------------------------------
 #MAIN
-
-#put the style sheet where it needs to be
-stl = 'rems_dark.mplstyle'
-trdir = join(matplotlib.get_configdir(), 'stylelib')
-if not isdir(trdir):
-    os.mkdir(trdir)
-trfn = join(trdir, stl)
-shutil.copyfile(stl, trfn)
-
-#use the style sheet
-importlib.reload(matplotlib)
-import matplotlib.pyplot as plt
-plt.style.use('rems_dark')
-plt.rc('font', family='serif')
-plt.rc('text', usetex=True)
 
 #load data
 df = pd.read_csv(fncsv)
