@@ -4,6 +4,9 @@ import bs4
 import requests
 import multiprocessing as mp
 
+#rename join for creating urls/paths with single backslashes (Windows problems)
+join = lambda *args: '/'.join(args)
+
 #-------------------------------------------------------------------------------
 #INPUTS
 
@@ -13,9 +16,6 @@ outdir = sys.argv[1]
 
 assert len(sys.argv) > 2, 'the number of cpus (for multiprocessing) must be specified at cmd line (2nd arg)'
 cpus = int(sys.argv[2])
-
-#rename join for creating urls/paths with single backslashes
-join = lambda *args: '/'.join(args)
 
 #base directory of data archive
 baseurl = 'https://atmos.nmsu.edu/PDS/data/mslrem_1001/'
@@ -27,15 +27,16 @@ labelurl = join(baseurl, 'LABEL', 'MODRDR6.FMT')
 dataurl = join(baseurl, 'DATA')
 
 #columns to write to file
-cols = ['TIMESTAMP',
-        'LMST',
-        'LTST',
-        'AMBIENT_TEMP',
-        'PRESSURE',
-        'HORIZONTAL_WIND_SPEED',
-        'VERTICAL_WIND_SPEED',
-        'VOLUME_MIXING_RATIO',
-        'LOCAL_RELATIVE_HUMIDITY']
+cols = [
+    'TIMESTAMP',
+    #'LMST',
+    #'LTST',
+    'AMBIENT_TEMP',
+    'PRESSURE',
+    'HORIZONTAL_WIND_SPEED',
+    'VERTICAL_WIND_SPEED',
+    'LOCAL_RELATIVE_HUMIDITY'
+]
 
 #-------------------------------------------------------------------------------
 #FUNCTIONS
@@ -45,30 +46,23 @@ get_file = lambda url: requests.get(url).content.decode('utf-8')
 
 #get linked files in a single web page, from its url string
 def get_links(url):
-    #get html text
-    html = get_file(url)
-    #parse it with beautiful soup
-    soup = bs4.BeautifulSoup(html, 'html.parser')
-    #get path elements for all the links
+    #parsed html structure
+    soup = bs4.BeautifulSoup(get_file(url), 'html.parser')
+    #path elements for all the links
     links = [link.get('href') for link in soup.find_all('a')]
     return(links)
 
 def download(url, sol, colnums, outdir):
-    #extract data
-    table = get_file(url)
-    #remove unwanted values
-    table = table.replace('UNK','').replace('NULL','')
+    #extract data and remove unwanted values
+    table = get_file(url).replace('UNK','').replace('NULL','')
     #write data to new file
     with open('%s/sol_%06d.csv' % (outdir, sol), 'w') as ofile:
         #column headers
         ofile.write('SOL,' + ','.join(cols) + '\n')
         #csv body
         for line in table.strip().split('\n'):
-            #split the table row on its commas
             s = line.strip().split(',')
-            #select only the desired column elements
-            s = [s[i].strip() for i in colnums]
-            #write the elements to file, along with the sol
+            s = [s[i].strip() for i in colnums] #only the desired column elements
             ofile.write('%d,' % sol)
             ofile.write(','.join(s) + '\n')
     print('sol %s written' % sol)
@@ -78,11 +72,11 @@ def download(url, sol, colnums, outdir):
 
 if __name__ == '__main__':
 
-    #make sure the output directory is there
+    #create output directory if needed
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
 
-    #read column headers from label file
+    #read column headers from the data label/description file
     name2num = {}
     lines = get_file(labelurl).split('\n')
     for i in range(len(lines)):
@@ -94,7 +88,7 @@ if __name__ == '__main__':
             #get the column name/description from the following line
             line = lines[i+1]
             colname = line[line.index('=')+1:].strip().replace('"','')
-            #save the column num and name
+            #store the column num and name
             name2num[colname] = colnum
 
     #start pool
@@ -114,7 +108,11 @@ if __name__ == '__main__':
                     for fn in get_links(join(dataurl, dn1, dn2)):
                         if(('RMD' in fn) and ('.TAB' in fn)):
                             url = join(dataurl, dn1, dn2, fn)
-                            res.append(pool.apply_async(download,
-                                    (url, sol, colnums, outdir)))
-    #execute all the function calls
+                            res.append(
+                                pool.apply_async(
+                                    download,
+                                    (url, sol, colnums, outdir)
+                                )
+                            )
+    #execute all the function calls across multiple processes
     [r.get() for r in res]
