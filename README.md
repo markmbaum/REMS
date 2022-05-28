@@ -9,6 +9,8 @@ Looking in the `scripts` directory:
 
 --------------------
 
+REMS cycles!
+
 This plot shows the daily minimum, mean, and maximum values for pressure and temperature over several Mars years. On Mars, the planetary rotation rate and day length is very similar to Earth's, but the planet's orbit is larger, so the Martian year is longer. One Mars year is about 687 sols (Mars days). Gale Crater is about 5 degrees above the equator, so a seasonal temperature cycle is evident. The seasonal pressure cycle, however, is very different from Earth's and is an interesting physical riddle. Can you explain it?
 
 ![daily_stats](plots/daily_stats.png)

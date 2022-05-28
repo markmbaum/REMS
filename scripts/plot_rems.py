@@ -23,13 +23,7 @@ def savefig(fig, fn):
 #------------------------------------------------------------------------------
 
 #load data
-df = DataFrame({
-    't': fromfile(join(dirin, 't_int32'), dtype=int32),
-    'sol': fromfile(join(dirin, 'sol_int32'), dtype=int32),
-    'T': fromfile(join(dirin, 'ambient_temp_float32'), dtype=float32),
-    'P': fromfile(join(dirin, 'pressure_float32'), dtype=float32),
-})
-#df = df.dropna()
+df = read_feather(join(dirin, 'rems.feather'))
 print('data loaded')
 
 #P & T histogram
