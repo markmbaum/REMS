@@ -1,3 +1,5 @@
+# REMS
+
 The python scripts in this repository download, process, and plot data from the [REMS](https://mars.nasa.gov/msl/mission/instruments/environsensors/rems/) weather sensors onboard the [Curiosity Rover](https://en.wikipedia.org/wiki/Curiosity_(rover)) in Gale Crater, Mars. The rover has been rolling around collecting measurements since August 2012. The data quality is not great, with a fair amount missing or questionable, but it's interesting nevertheless.
 
 -------------------
