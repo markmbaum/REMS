@@ -24,7 +24,6 @@ def savefig(fig, fn):
 
 #load data
 df = read_feather(join(dirin, 'rems.feather'))
-df = df.iloc[::100]
 print('data loaded')
 
 #max, mean, min temperature and pressure
