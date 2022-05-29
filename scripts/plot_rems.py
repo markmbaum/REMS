@@ -24,14 +24,8 @@ def savefig(fig, fn):
 
 #load data
 df = read_feather(join(dirin, 'rems.feather'))
+df = df.iloc[::100]
 print('data loaded')
-
-#P & T histogram
-fig, ax = plt.subplots(1, 1, constrained_layout=True)
-histplot(df, x='T', y='P', cmap='magma', ax=ax)
-ax.set_xlabel('Temperature [K]')
-ax.set_ylabel('Pressure [Pa]')
-savefig(fig, 'P_T_histogram')
 
 #max, mean, min temperature and pressure
 fig, axs = plt.subplots(2, 1, constrained_layout=True)
@@ -39,15 +33,22 @@ g = df.groupby('sol')
 ma = g.max()
 me = g.mean()
 mi = g.min('sol')
-for ax, c in zip(axs, ('T', 'P')):
-    for mm, label in zip((ma, me, mi), ('max', 'mean', 'min')):
-        ax.plot(mm.index.values, mm[c], label=label)
+colors = ('C0', 'C4', 'C9')
+for ax, c in zip(axs, ('ambient_temp', 'pressure')):
+    for mm, label, color in zip((ma, me, mi), ('max', 'mean', 'min'), colors):
+        ax.plot(mm.index.values, mm[c], color=color, label=label)
 fig.supxlabel("Sol (Mars Day)")
 axs[0].set_ylabel("Temperature [K]")
-axs[0].legend()
 axs[1].set_ylabel("Pressure [Pa]")
 axs[1].legend()
 fig.suptitle("Daily Max, Mean, and Min Weather from the Curiosity Rover")
 savefig(fig, 'daily_stats')
 
-plt.show()
+#P & T histogram
+fig, ax = plt.subplots(1, 1, constrained_layout=True)
+histplot(df, x='ambient_temp', y='pressure', cmap='magma', ax=ax)
+ax.set_xlabel('Temperature [K]')
+ax.set_ylabel('Pressure [Pa]')
+savefig(fig, 'P_T_histogram')
+
+plt.close('all')
